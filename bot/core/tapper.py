@@ -33,6 +33,7 @@ class Tapper:
         self.fullname = None
         self.start_param = None
         self.peer = None
+        self.proxy_url = None
 
         self.session_ug_dict = self.load_user_agents() or []
 
@@ -43,27 +44,27 @@ class Tapper:
 
     def info(self, message):
         from bot.utils import info
-        info(f"<light-yellow>{self.session_name}</light-yellow> | {message}")
+        info(f"<light-yellow>{self.session_name}</light-yellow> | {self.proxy_url} | {message}")
 
     def debug(self, message):
         from bot.utils import debug
-        debug(f"<light-yellow>{self.session_name}</light-yellow> | {message}")
+        debug(f"<light-yellow>{self.session_name}</light-yellow> | {self.get_proxy_string()} {message}")
 
     def warning(self, message):
         from bot.utils import warning
-        warning(f"<light-yellow>{self.session_name}</light-yellow> | {message}")
+        warning(f"<light-yellow>{self.session_name}</light-yellow> | {self.proxy_url} | {message}")
 
     def error(self, message):
         from bot.utils import error
-        error(f"<light-yellow>{self.session_name}</light-yellow> | {message}")
+        error(f"<light-yellow>{self.session_name}</light-yellow> | {self.proxy_url} | {message}")
 
     def critical(self, message):
         from bot.utils import critical
-        critical(f"<light-yellow>{self.session_name}</light-yellow> | {message}")
+        critical(f"<light-yellow>{self.session_name}</light-yellow> | {self.proxy_url} | {message}")
 
     def success(self, message):
         from bot.utils import success
-        success(f"<light-yellow>{self.session_name}</light-yellow> | {message}")
+        success(f"<light-yellow>{self.session_name}</light-yellow> | {self.proxy_url} | {message}")
 
     def save_user_agent(self):
         user_agents_file_name = "user_agents.json"
@@ -119,6 +120,7 @@ class Tapper:
                 username=proxy.login,
                 password=proxy.password
             )
+            self.proxy_url = f"{proxy.host}:{proxy.port}" 
         else:
             proxy_dict = None
 
