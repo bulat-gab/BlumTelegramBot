@@ -77,7 +77,12 @@ async def process() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
 
-    logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
+    proxies = get_proxies()
+    if not proxies or len(proxies) == 0:
+        logger.critical(f"Could not get proxies. Exiting...")
+        exit(1)
+
+    logger.info(f"Detected {len(get_session_names())} sessions | {len(proxies)} proxies")
 
     action = parser.parse_args().action
 
