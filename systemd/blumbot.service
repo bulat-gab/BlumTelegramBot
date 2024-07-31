@@ -1,0 +1,14 @@
+[Unit]
+Description=BlumTelegramBot
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/BlumTelegramBot/
+Environment=PATH=/root/BlumTelegramBot/venv/bin/
+ExecStart=/root/BlumTelegramBot/venv/bin/python3 /root/BlumTelegramBot/main.py -a 1
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
