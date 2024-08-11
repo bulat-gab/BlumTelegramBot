@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
+class SettingsV2(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True)
 
     API_ID: int
@@ -33,4 +33,4 @@ class Settings(BaseSettings):
     SOLVE_TASKS: bool
 
 
-settings = Settings()
+settingsV2 = SettingsV2()

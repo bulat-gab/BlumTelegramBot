@@ -8,7 +8,7 @@ from itertools import zip_longest
 from utils.core import get_all_lines
 import os
 import argparse
-from data import config
+
 from launcher import get_proxy_with_client
 
 async def main():
@@ -38,6 +38,8 @@ async def main():
             for thread, (proxy, account) in enumerate(proxy_with_client):
                 if not account:
                     break
+
+                logger.info(f"Account {account} | Proxy {proxy.host}")
                 tasks.append(asyncio.create_task(start(account=account, thread=thread, proxy=proxy)))
 
             await asyncio.gather(*tasks)

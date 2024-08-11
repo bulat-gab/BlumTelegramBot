@@ -6,7 +6,7 @@ from aiocfscrape import CloudflareScraper
 from better_proxy import Proxy
 from .agents import generate_random_user_agent
 
-from data import config
+from data import settingsV2
 from utils.blum import BlumBot
 from utils.core import logger
 from utils.helper import format_duration
@@ -21,20 +21,16 @@ async def start(thread: int, account: str, proxy: Proxy):
                 blum = BlumBot(account=account, thread=thread, session=session, proxy=proxy)
                 max_try = 2
 
-                await sleep(uniform(*config.DELAYS['ACCOUNT']))
+                await sleep(uniform(*settingsV2.DELAYS['ACCOUNT']))
                 await blum.login()
 
                 while True:
                     try:
-                        if config.SOLVE_TASKS:
+                        if settingsV2.SOLVE_TASKS:
                             async def solve_task(t):
                                 task_status = t.get('status')
                                 if task_status == "READY_FOR_CLAIM":
-                                    task_claimed = await blum.claim_task(t)
-                                    if task_claimed:
-                                        logger.success(f"{account} | Claimed task id '{t['id']}' title: '{t['title']}'")
-                                    else:
-                                        logger.warning(f"{account} | Could not claim task. task id: {t['id']}; title: {t['title']}")
+                                    await blum.claim_task(t)
 
                                 if t.get('kind') == "ONGOING":
                                     logger.info(f"{account} | Skipping ongoing task {t['title']}. Not ready for claim")
@@ -54,7 +50,12 @@ async def start(thread: int, account: str, proxy: Proxy):
                                     logger.warning(f"{account} | Unknown task status: {task_status}. task id '{t['id']}' title: '{t['title']}'")
                                 
                             try:
-                                tasks = await blum.get_tasks()
+                                tasks_list = await blum.get_tasks()
+                                tasks = []
+                                for t in tasks_list:
+                                    for tt in t['tasks']:
+                                        tasks.append(tt)
+
                                 filtered_tasks = []
                                 for t in tasks:
                                     kind = t.get('kind')
@@ -101,9 +102,9 @@ async def start(thread: int, account: str, proxy: Proxy):
                             amount = await blum.friend_claim()
                             logger.success(f"{account} | Claimed friend ref reward {amount}")
 
-                        if config.PLAY_GAMES is False:
+                        if settingsV2.PLAY_GAMES is False:
                             play_passes = 0
-                        elif play_passes and play_passes > 0 and config.PLAY_GAMES is True:
+                        elif play_passes and play_passes > 0 and settingsV2.PLAY_GAMES is True:
                             await blum.play_game(play_passes)
 
                         await sleep(uniform(3, 10))

@@ -1,1 +1,1 @@
-from configV2 import settings
+from .configV2 import settingsV2

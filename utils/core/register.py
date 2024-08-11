@@ -1,7 +1,7 @@
 import pyrogram
 
 from utils.core import logger
-from data import config
+from data import settingsV2
 
 
 async def create_sessions():
@@ -12,10 +12,10 @@ async def create_sessions():
             return
 
         session = pyrogram.Client(
-            api_id=config.API_ID,
-            api_hash=config.API_HASH,
+            api_id=settingsV2.API_ID,
+            api_hash=settingsV2.API_HASH,
             name=session_name,
-            workdir=config.WORKDIR,
+            workdir=settingsV2.WORKDIR,
         )
 
         async with session:

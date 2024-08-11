@@ -6,7 +6,7 @@ from pyrogram import Client
 from pyrogram.raw.functions.messages import RequestWebView
 import asyncio
 from urllib.parse import unquote
-from data import settings as config
+from data import settingsV2
 
 
 class BlumBot:
@@ -26,7 +26,7 @@ class BlumBot:
                 "password": proxy.password
             }
 
-        self.client = Client(name=account, api_id=config.API_ID, api_hash=config.API_HASH, workdir=config.WORKDIR,
+        self.client = Client(name=account, api_id=settingsV2.API_ID, api_hash=settingsV2.API_HASH, workdir=settingsV2.WORKDIR,
                              proxy=proxy)
         self.session = session
         self.refresh_token = ''
@@ -45,9 +45,13 @@ class BlumBot:
                                        proxy=self.proxy, ssl=False)
         resp_json = await resp.json()
         
-        logger.debug(f"{self.client.name} | claim_task response: {resp_json}")
-
-        return resp_json.get('status') == "CLAIMED"
+        if resp.status == 200 and resp_json.get('status') == "FINISHED":
+            logger.success(f"{self.client.name} | Task '{resp_json['title']}' claimed. Reward '{resp_json['reward']}'")
+            return True
+        
+        logger.warning(f"{self.client.name} | Task claim failed.")
+        return False
+        
 
     async def start_complete_task(self, task: dict):
         """
@@ -57,7 +61,12 @@ class BlumBot:
                                        proxy=self.proxy, ssl=False)
         resp_json = await resp.json()
 
-        logger.debug(f"{self.client.name} | start_complete_task response: {resp_json}")
+        if resp.status == 200:
+            logger.success(f"{self.client.name} | Task '{resp_json['title']}' started")
+            return True
+        
+        logger.warning(f"{self.client.name} | Task claim failed.")
+        return False 
 
     async def get_tasks(self):
         """
@@ -81,7 +90,7 @@ class BlumBot:
         """
         while play_passes:
             try:
-                await asyncio.sleep(random.uniform(*config.DELAYS['PLAY']))
+                await asyncio.sleep(random.uniform(*settingsV2.DELAYS['PLAY']))
                 game_id = await self.start_game()
 
                 if not game_id or game_id == "cannot start game":
@@ -103,7 +112,7 @@ class BlumBot:
 
             except Exception as e:
                 logger.error(f"{self.client.name} | Error occurred during play_game: {e}")
-                await asyncio.sleep(random.uniform(*config.DELAYS['ERROR_PLAY']))
+                await asyncio.sleep(random.uniform(*settingsV2.DELAYS['ERROR_PLAY']))
 
     async def claim_daily_reward(self):
         """
@@ -141,7 +150,7 @@ class BlumBot:
         """
         Claim the reward for a completed game.
         """
-        points = random.randint(*config.POINTS)
+        points = random.randint(*settingsV2.POINTS)
         json_data = {"gameId": game_id, "points": points}
 
         resp = await self.session.post("https://game-domain.blum.codes/api/v1/game/claim", json=json_data,
