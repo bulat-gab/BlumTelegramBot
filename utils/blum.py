@@ -6,7 +6,7 @@ from pyrogram import Client
 from pyrogram.raw.functions.messages import RequestWebView
 import asyncio
 from urllib.parse import unquote
-from data import config
+from data import settings as config
 
 
 class BlumBot:
