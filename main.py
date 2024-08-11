@@ -1,3 +1,5 @@
+from typing import Tuple
+from better_proxy import Proxy
 from utils.core import create_sessions, logger
 from utils.telegram import Accounts
 from utils.starter import start
@@ -7,7 +9,7 @@ from utils.core import get_all_lines
 import os
 import argparse
 from data import config
-
+from launcher import get_proxy_with_client
 
 async def main():
     print("Soft created by: https://t.me/hidden_coding\n")
@@ -30,14 +32,10 @@ async def main():
     if action == 1:
         try:
             accounts = await Accounts().get_accounts()
-
-            if config.PROXY is True:
-                proxys = get_all_lines("data/proxy.txt")
-            else:
-                proxys = ""
+            proxy_with_client: list[Tuple[Proxy, str]] = await get_proxy_with_client(accounts)
 
             tasks = []
-            for thread, (account, proxy) in enumerate(zip_longest(accounts, proxys)):
+            for thread, (proxy, account) in enumerate(proxy_with_client):
                 if not account:
                     break
                 tasks.append(asyncio.create_task(start(account=account, thread=thread, proxy=proxy)))

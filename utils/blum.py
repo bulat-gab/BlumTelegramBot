@@ -1,4 +1,6 @@
 import random
+
+from better_proxy import Proxy
 from utils.core import logger
 from pyrogram import Client
 from pyrogram.raw.functions.messages import RequestWebView
@@ -8,21 +10,20 @@ from data import config
 
 
 class BlumBot:
-    def __init__(self, thread, account, session, proxy):
+    def __init__(self, thread, account, session, proxy: Proxy):
         """
         Initialize the BlumBot with thread id, account name, and optional proxy.
         """
-        self.proxy = f"http://{proxy}" if proxy is not None else None
+        self.proxy = proxy.as_url
         self.thread = thread
         
         if proxy:
-            parts = proxy.split(":")
             proxy = {
-                "scheme": "http",
-                "hostname": parts[0] if len(parts) == 2 else parts[1].split('@')[1],
-                "port": int(parts[2]) if len(parts) == 3 else int(parts[1]),
-                "username": parts[0] if len(parts) == 3 else "",
-                "password": parts[1].split('@')[0] if len(parts) == 3 else ""
+                "scheme": proxy.protocol,
+                "hostname": proxy.host,
+                "port": proxy.port,
+                "username": proxy.login,
+                "password": proxy.password
             }
 
         self.client = Client(name=account, api_id=config.API_ID, api_hash=config.API_HASH, workdir=config.WORKDIR,

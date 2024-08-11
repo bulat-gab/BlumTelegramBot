@@ -3,6 +3,7 @@ from random import uniform
 
 import aiohttp
 from aiocfscrape import CloudflareScraper
+from better_proxy import Proxy
 from .agents import generate_random_user_agent
 
 from data import config
@@ -11,7 +12,7 @@ from utils.core import logger
 from utils.helper import format_duration
 
 
-async def start(thread: int, account: str, proxy: [str, None]):
+async def start(thread: int, account: str, proxy: Proxy):
     while True:
         async with CloudflareScraper(headers={'User-Agent': generate_random_user_agent(device_type='android',
                                                                                        browser_type='chrome')},
