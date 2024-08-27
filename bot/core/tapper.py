@@ -24,6 +24,7 @@ from .helper import format_duration
 
 class Tapper:
     def __init__(self, tg_client: Client):
+        self.use_ref = settings.USE_REF
         self.session_name = tg_client.name
         self.tg_client = tg_client
         self.user_id = 0
@@ -142,7 +143,7 @@ class Tapper:
                 except (Unauthorized, UserDeactivated, AuthKeyUnregistered):
                     raise InvalidSession(self.session_name)
 
-            self.start_param = random.choices([settings.REF_ID, "ref_QwD3tLsY8f"], weights=[75, 25], k=1)[0]
+            self.start_param = settings.REF_ID
             peer = await self.tg_client.resolve_peer('BlumCryptoBot')
             InputBotApp = types.InputBotAppShortName(bot_id=peer, short_name="app")
 
@@ -186,7 +187,7 @@ class Tapper:
         try:
             await http_client.options(url=f'{self.user_url}/api/v1/auth/provider/PROVIDER_TELEGRAM_MINI_APP')
             while True:
-                if settings.USE_REF is False:
+                if self.use_ref is False:
 
                     json_data = {"query": initdata}
                     resp = await http_client.post(f"{self.user_url}/api/v1/auth/provider"
@@ -202,7 +203,6 @@ class Tapper:
                     return resp_json.get("token").get("access"), resp_json.get("token").get("refresh")
 
                 else:
-
                     json_data = {"query": initdata, "username": self.username,
                                  "referralToken": self.start_param.split('_')[1]}
 
@@ -213,10 +213,24 @@ class Tapper:
                         self.warning('Relogin')
                         await asyncio.sleep(delay=3)
                         continue
-                    #self.debug(f'login text {await resp.text()}')
-                    resp_json = await resp.json()
+                    
+                    if resp.status == 500:
+                        resp_json = await resp.json()
+                        if "AlreadyExists" in resp_json.get('message'):
+                            self.debug(f"Could not login with a ref link. User is already registered. Continue login without a ref link.")
+                            self.use_ref = False
+                            await asyncio.sleep(delay=3)
+                            continue
 
-                    if resp_json.get("message") == "rpc error: code = AlreadyExists desc = Username is not available":
+                        wait_time = 3600
+                        self.error(f"{resp.reason} occured during login. Sleep for {wait_time} seconds before retry.")
+                        await asyncio.sleep(delay=wait_time) # sleep for 1 hour
+                        continue
+
+                    #self.debug(f'login text {await resp.text()}')
+                    
+
+                    if resp_json.get("message") == "Username is not available":
                         while True:
                             name = self.username
                             rand_letters = ''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 8)))
