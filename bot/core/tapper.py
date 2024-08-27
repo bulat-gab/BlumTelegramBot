@@ -156,7 +156,7 @@ class Tapper:
                         self.critical(f"Session {self.session_name} is deleted, moving to deleted sessions folder")
                     return None
 
-            self.start_param = random.choices([settings.REF_ID, "ref_QwD3tLsY8f"], weights=[75, 25], k=1)[0]
+            self.start_param = settings.REF_ID
             peer = await self.tg_client.resolve_peer('BlumCryptoBot')
             InputBotApp = types.InputBotAppShortName(bot_id=peer, short_name="app")
 
@@ -235,6 +235,12 @@ class Tapper:
                     resp = await http_client.post(f"{self.user_url}/api/v1/auth/provider"
                                                   "/PROVIDER_TELEGRAM_MINI_APP",
                                                   json=json_data, ssl=False)
+                    if resp.status == 409:
+                        self.debug(f"User already registered. Turning off ref link and trying again.")    
+                        self.use_ref = False
+                        await asyncio.sleep(delay=5)
+                        continue
+
                     if resp.status == 520:
                         self.warning('Relogin')
                         await asyncio.sleep(delay=3)
@@ -242,7 +248,7 @@ class Tapper:
                     #self.debug(f'login text {await resp.text()}')
                     resp_json = await resp.json()
 
-                    if resp_json.get("message") == "Username is not available":
+                    if resp_json.get("message") == "rpc error: code = AlreadyExists desc = Username is not available":
                         while True:
                             name = self.username
                             rand_letters = ''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 8)))
