@@ -8,4 +8,6 @@ services:
     command: "python3 main.py -a 1"
     volumes:
       - ./sessions:/app/sessions
-      - .:/app
+      - ./do_not_commit.proxies.json:/app/do_not_commit.proxies.json
+    env_file:
+      - .env

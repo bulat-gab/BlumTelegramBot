@@ -8,7 +8,7 @@ from utils.core import logger
 
 def get_proxies_V2() -> json:
     proxies = None
-    with open(file="proxies.json", encoding="utf-8-sig") as file:
+    with open(file="do_not_commit.proxies.json", encoding="utf-8-sig") as file:
         proxies = json.load(file)
         return proxies
     
