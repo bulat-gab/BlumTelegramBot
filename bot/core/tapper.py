@@ -203,34 +203,27 @@ class Tapper:
                     return resp_json.get("token").get("access"), resp_json.get("token").get("refresh")
 
                 else:
+
                     json_data = {"query": initdata, "username": self.username,
                                  "referralToken": self.start_param.split('_')[1]}
 
                     resp = await http_client.post(f"{self.user_url}/api/v1/auth/provider"
                                                   "/PROVIDER_TELEGRAM_MINI_APP",
                                                   json=json_data, ssl=False)
+                    if resp.status == 409:
+                        self.debug(f"User already registered. Turning off ref link and trying again.")    
+                        self.use_ref = False
+                        await asyncio.sleep(delay=5)
+                        continue
+
                     if resp.status == 520:
                         self.warning('Relogin')
                         await asyncio.sleep(delay=3)
                         continue
-                    
-                    if resp.status == 500:
-                        resp_json = await resp.json()
-                        if "AlreadyExists" in resp_json.get('message'):
-                            self.debug(f"Could not login with a ref link. User is already registered. Continue login without a ref link.")
-                            self.use_ref = False
-                            await asyncio.sleep(delay=3)
-                            continue
-
-                        wait_time = 3600
-                        self.error(f"{resp.reason} occured during login. Sleep for {wait_time} seconds before retry.")
-                        await asyncio.sleep(delay=wait_time) # sleep for 1 hour
-                        continue
-
                     #self.debug(f'login text {await resp.text()}')
-                    
+                    resp_json = await resp.json()
 
-                    if resp_json.get("message") == "Username is not available":
+                    if resp_json.get("message") == "rpc error: code = AlreadyExists desc = Username is not available":
                         while True:
                             name = self.username
                             rand_letters = ''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 8)))
