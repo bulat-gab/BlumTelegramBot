@@ -51,6 +51,8 @@ class Tapper:
 
         headers['User-Agent'] = self.check_user_agent()
 
+        self.drop_game_on = settings.PLAY_GAMES
+
     async def generate_random_user_agent(self):
         return generate_random_user_agent(device_type='android', browser_type='chrome')
 
@@ -435,6 +437,10 @@ class Tapper:
             total_games = 0
             tries = 3
             while play_passes:
+                if not self.drop_game_on:
+                    self.debug(f"Play games turned off. Quitting the play_game loop.")
+                    return
+
                 game_id = await self.start_game(http_client=http_client)
 
                 if not game_id or game_id == "cannot start game":
@@ -471,6 +477,8 @@ class Tapper:
                     dogs = random.randint(25, 30) * 5
                     msg, points = await self.claim_game(game_id=game_id, http_client=http_client, dogs=dogs)
                 else:
+                    self.warning(f"Not eligible for dogs drop. Turning games off...")
+                    self.drop_game_on = False
                     msg, points = await self.claim_game(game_id=game_id, http_client=http_client, dogs=0)
 
                 if isinstance(msg, bool) and msg:
@@ -701,7 +709,7 @@ class Tapper:
                     amount = await self.friend_claim(http_client=http_client)
                     self.success(f"Claimed friend ref reward {amount}")
 
-                if play_passes and play_passes > 0 and settings.PLAY_GAMES is True:
+                if play_passes and play_passes > 0 and self.drop_game_on is True:
                     await self.play_game(http_client=http_client, play_passes=play_passes, refresh_token=refresh_token)
 
                 if settings.JOIN_TRIBE:
