@@ -703,7 +703,8 @@ class Tapper:
                 if play_passes and play_passes > 0 and settings.PLAY_GAMES is True:
                     await self.play_game(http_client=http_client, play_passes=play_passes, refresh_token=refresh_token)
 
-                await self.join_tribe(http_client=http_client)
+                if settings.JOIN_TRIBE:
+                    await self.join_tribe(http_client=http_client)
 
                 if settings.AUTO_TASKS:
                     tasks = await self.get_tasks(http_client=http_client)

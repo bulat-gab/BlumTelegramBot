@@ -22,6 +22,7 @@ class Settings(BaseSettings):
 
     USE_PROXY_FROM_FILE: bool = False
 
+    JOIN_TRIBE: bool = False
 
 settings = Settings()
 
