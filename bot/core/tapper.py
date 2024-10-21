@@ -722,7 +722,7 @@ class Tapper:
                         if task.get('status') == "NOT_STARTED" and task.get('type') != "PROGRESS_TARGET":
                             self.info(f"Started doing task - '{task['title']}'")
                             await self.start_task(http_client=http_client, task_id=task["id"])
-                            await asyncio.sleep(0.5)
+                            await asyncio.sleep(random.uniform(1, 4))
 
                     await asyncio.sleep(5)
 
@@ -734,7 +734,7 @@ class Tapper:
                                 if status:
                                     logger.success(f"<light-yellow>{self.session_name}</light-yellow> | Claimed task - "
                                                    f"'{task['title']}'")
-                                await asyncio.sleep(0.5)
+                                await asyncio.sleep(random.uniform(1, 4))
                             elif task['status'] == "READY_FOR_VERIFY" and task['validationType'] == 'KEYWORD':
                                 status = await self.validate_task(http_client=http_client, task_id=task["id"],
                                                                   title=task['title'])
