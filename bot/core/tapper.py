@@ -505,6 +505,7 @@ class Tapper:
             if resp is not None:
                 data = await resp.json()
                 eligible = data.get('eligible', False)
+                self.info(f"Dogs eligible: {eligible}")
                 return eligible
 
         except Exception as e:
