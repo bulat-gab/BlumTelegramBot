@@ -661,11 +661,9 @@ class Tapper:
         except Exception as error:
             logger.error(f"<light-yellow>{self.session_name}</light-yellow> | Proxy: {proxy} | Error: {error}")
 
-    async def run(self, proxy: str | None) -> None:
-        if settings.USE_RANDOM_DELAY_IN_RUN:
-            random_delay = random.randint(settings.RANDOM_DELAY_IN_RUN[0], settings.RANDOM_DELAY_IN_RUN[1])
-            logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Bot will start in <ly>{random_delay}s</ly>")
-            await asyncio.sleep(random_delay)
+    async def run(self, proxy: str | None, start_delay: int = 0) -> None:
+        logger.info(f"<light-yellow>{self.session_name}</light-yellow> | Bot will start in <ly>{start_delay}s</ly>")
+        await asyncio.sleep(start_delay)
 
         refresh_token = None
         login_need = True
@@ -709,11 +707,11 @@ class Tapper:
                     amount = await self.friend_claim(http_client=http_client)
                     self.success(f"Claimed friend ref reward {amount}")
 
-                if play_passes and play_passes > 0 and self.drop_game_on is True:
-                    await self.play_game(http_client=http_client, play_passes=play_passes, refresh_token=refresh_token)
-
                 if settings.JOIN_TRIBE:
                     await self.join_tribe(http_client=http_client)
+
+                if play_passes and play_passes > 0 and self.drop_game_on is True:
+                    await self.play_game(http_client=http_client, play_passes=play_passes, refresh_token=refresh_token)                
 
                 if settings.AUTO_TASKS:
                     tasks = await self.get_tasks(http_client=http_client)
@@ -775,8 +773,8 @@ class Tapper:
                 await asyncio.sleep(delay=3)
 
 
-async def run_tapper(tg_client: Client, proxy: str | None):
+async def run_tapper(tg_client: Client, proxy: str | None, start_delay: int = 0):
     try:
-        await Tapper(tg_client=tg_client).run(proxy=proxy)
+        await Tapper(tg_client=tg_client).run(proxy=proxy, start_delay=start_delay)
     except InvalidSession:
         logger.error(f"{tg_client.name} | Invalid Session")

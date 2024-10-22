@@ -2,6 +2,7 @@ import os
 import glob
 import asyncio
 import argparse
+import random
 
 from bot.utils.proxy_utils_v1 import create_tg_client_proxy_pairs
 from pyrogram import Client
@@ -113,9 +114,25 @@ async def run_tasks(tg_clients: list[Client]):
             run_tapper(
                 tg_client=pair[0],
                 proxy=pair[1].as_url,
+                start_delay=calculate_start_delay(len(client_proxy_list), i)
             )
         )
-        for pair in client_proxy_list
+        for i, pair in enumerate(client_proxy_list)
     ]
 
+    tasks = tasks[:1]
     await asyncio.gather(*tasks)
+
+
+def calculate_start_delay(sessions_count: int, session_index: int):
+    if not settings.USE_RANDOM_DELAY_IN_RUN:
+        return 0
+
+    interval = settings.RANDOM_DELAY_IN_RUN[1] // sessions_count # seconds between each session start
+
+    base_start_time = session_index * interval
+    variance = interval // 10
+    start_time = base_start_time + random.randint(-variance, variance)
+
+    start_delay = max(settings.RANDOM_DELAY_IN_RUN[0], min(start_time, settings.RANDOM_DELAY_IN_RUN[1]))
+    return start_delay
