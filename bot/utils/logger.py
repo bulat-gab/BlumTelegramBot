@@ -10,7 +10,8 @@ level = "DEBUG" if settings.DEBUG else "INFO"
 
 logger.add(sink=sys.stdout, level=level, format="<light-white>{time:YYYY-MM-DD HH:mm:ss}</light-white>"
                                    " | <level>{level}</level>"
-                                   " | <light-white><b>{message}</b></light-white>")
+                                   " | <light-white><b>{message}</b></light-white>",
+                                   colorize=True)
 
 logger.add("blum_dev.log", level="DEBUG", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="20 MB")
 

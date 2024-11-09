@@ -11,6 +11,7 @@ from bot.config import settings
 from bot.core.tapper import run_tapper
 from bot.utils.logger import logger
 from bot.utils.payload import check_payload_server
+from bot.utils.proxy_utils_v2 import create_tg_client_proxy_pairs
 
 start_text = """
 ██████╗ ██╗     ██╗   ██╗███╗   ███╗████████╗ ██████╗ ██████╗  ██████╗ ████████╗
@@ -70,8 +71,7 @@ def get_tg_clients() -> list[Client]:
 
 async def run_tasks():
     tg_clients = get_tg_clients()
-    proxies = get_proxies()
-    proxies_cycle = cycle(proxies) if proxies else None
+    client_proxy_list = create_tg_client_proxy_pairs(tg_clients)
     loop = asyncio.get_event_loop()
 
     if settings.USE_CUSTOM_PAYLOAD_SERVER and not await check_payload_server(settings.CUSTOM_PAYLOAD_SERVER_URL, full_test=True):
@@ -84,11 +84,11 @@ async def run_tasks():
     tasks = [
         loop.create_task(
             run_tapper(
-                tg_client=tg_client,
-                proxy=next(proxies_cycle) if proxies_cycle else None
+                tg_client=pair[0],
+                proxy=pair[1]
             )
         )
-        for tg_client in tg_clients
+        for pair in client_proxy_list
     ]
 
     await asyncio.gather(*tasks)
