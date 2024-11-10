@@ -9,3 +9,14 @@ services:
     command: "python3 main.py -a 1"
     volumes:
       - .:/app
+  payload_server:
+    container_name: "BlumPayloadServer"
+    build:
+      context: ./BlumPayloadGenerator
+    stop_signal: SIGINT
+    restart: unless-stopped
+    command: "npm start"
+    volumes:
+      - ./BlumPayloadGenerator:/app
+    ports:
+      - "9876:9876"
