@@ -11,6 +11,6 @@ services:
     networks:
       - blum_network # Make sure to use the same network as the payload server
 
-  networks:
-    blum_network:
-      driver: bridge
+networks:
+  blum_network:
+    driver: bridge
