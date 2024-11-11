@@ -8,3 +8,9 @@ services:
     command: "python3 main.py -a 1"
     volumes:
       - .:/app
+    networks:
+      - blum_network # Make sure to use the same network as the payload server
+
+  networks:
+    blum_network:
+      driver: bridge
