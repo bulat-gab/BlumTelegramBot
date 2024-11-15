@@ -2,14 +2,14 @@
 
 ## Create a shared network
 
-`docker network create blumtelegrambot_blum_network` - since I use docker compose to run BlumBot, the name of the network will be folder_name + network_name
+`docker network create blum_network`
 
 ## Start Payload server container
 
 ```
 cd ./BlumPayloadGenerator
 docker build -t blum-payload-server -f ./Dockerfile .
-docker run -d --name BlumPayloadServer --network blumtelegrambot_blum_network -p 9876:9876 blum-payload-server
+docker run -d --name BlumPayloadServer --network blum_network -p 9876:9876 blum-payload-server
 ```
 
 ## Start BlumBot
