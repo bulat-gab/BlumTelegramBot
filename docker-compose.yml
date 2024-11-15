@@ -13,4 +13,5 @@ services:
 
 networks:
   blum_network:
+    name: blum_network
     driver: bridge
